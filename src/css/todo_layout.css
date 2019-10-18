@@ -153,11 +153,23 @@ body {
   display: grid;
 }
 #item_description_prompt {}
-#item_description_textfield {}
+#item_description_textfield {
+  position: absolute;
+  left: 8%;
+  width: 79%;
+}
 #item_assigned_to_prompt {}
-#item_assigned_to_textfield {}
+#item_assigned_to_textfield {
+  position: absolute;
+  left: 8%;
+  width: 79%;
+}
 #item_due_date_prompt {}
-#item_due_date_picker {}
+#item_due_date_picker {
+  position: absolute;
+  left: 8%;
+  width: 79%;
+}
 #item_completed_prompt {}
 #item_completed_checkbox {}
 #item_form_submit_button {
