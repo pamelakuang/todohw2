@@ -10,6 +10,7 @@ import ListNameChangeTransaction from './jTPS/src/jtps/ListNameChange_Transactio
 import ListOwnerChangeTransaction from './jTPS/src/jtps/ListOwnerChange_Transaction'
 import ListItemRemovalTransaction from './jTPS/src/jtps/ListItemRemoval_Transaction'
 import ListItemEditTransaction from './jTPS/src/jtps/ListItemEdit_Transaction'
+import ListSortingTransaction from './jTPS/src/jtps/ListSorting_Transaction'
 
 const AppScreen = {
   HOME_SCREEN: "HOME_SCREEN",
@@ -50,6 +51,10 @@ class App extends Component {
   
   addItemEditTransaction = (list, currentItem, editOrNewItem, isEditingItem) => {
     this.tps.addTransaction(new ListItemEditTransaction(list, currentItem, editOrNewItem, isEditingItem));
+  }
+
+  addListSortingTransaction = (list, sortingCriteria) => {
+    this.tps.addTransaction(new ListSortingTransaction(list, sortingCriteria));
   }
 
   goHome = () => {
@@ -176,18 +181,18 @@ class App extends Component {
       this.setState({sortingCriteria:"sort_by_task_increasing"});
       this.sortTasks("sort_by_task_increasing");
     }
+}
+processSortItemsByDueDate = () =>{
+  // IF WE ARE CURRENTLY INCREASING BY TASK SWITCH TO DECREASING
+  if (this.state.sortingCriteria==="sort_by_due_date_increasing") {
+      this.sortTasks("sort_by_due_date_decreasing");
   }
-  processSortItemsByDueDate = () =>{
-    // IF WE ARE CURRENTLY INCREASING BY TASK SWITCH TO DECREASING
-    if (this.state.sortingCriteria==="sort_by_due_date_increasing") {
-        this.sortTasks("sort_by_due_date_decreasing");
-    }
-    // ALL OTHER CASES SORT BY INCREASING
-    else {
-      this.setState({sortingCriteria:"sort_by_due_date_increasing"});
-      this.sortTasks("sort_by_due_date_increasing");
-    }
+  // ALL OTHER CASES SORT BY INCREASING
+  else {
+    this.setState({sortingCriteria:"sort_by_due_date_increasing"});
+    this.sortTasks("sort_by_due_date_increasing");
   }
+}
   processSortItemsByStatus = () =>{
     // IF WE ARE CURRENTLY INCREASING BY TASK SWITCH TO DECREASING
     if (this.state.sortingCriteria==="sort_by_status_increasing") {
@@ -199,52 +204,13 @@ class App extends Component {
       this.sortTasks("sort_by_status_increasing");
     }
   }
-  sortTasks = (sortingCriteria) => {
-      this.setState( {sortingCriteria: sortingCriteria});
-      //this.state.sortingCriteria = sortingCriteria;
-      this.state.currentList.items.sort(this.compare);
+    sortTasks = (criteria) => {
+      this.state.sortingCriteria = criteria;
+      this.addListSortingTransaction(this.state.currentList, this.state.sortingCriteria);
+      //this.state.currentList.items.sort(this.compare);
       this.loadList(this.state.currentList);
   }
-  compare = (item1, item2) => {
-    // IF IT'S A DECREASING CRITERIA SWAP THE ITEMS
-    if (this.state.sortingCriteria==="sort_by_task_decreasing"
-        || this.state.sortingCriteria==="sort_by_status_decreasing"
-        || this.state.sortingCriteria==="sort_by_due_date_decreasing") {
-        let temp = item1;
-        item1 = item2;
-        item2 = temp;
-    }
-    // SORT BY ITEM DESCRIPTION
-    if (this.state.sortingCriteria==="sort_by_task_increasing"
-        || this.state.sortingCriteria==="sort_by_task_decreasing") {
-        if (item1.description < item2.description)
-            return -1;
-        else if (item1.description > item2.description)
-            return 1;
-        else
-            return 0;
-    }
-    // SORT BY DUE DATE
-    else if (this.state.sortingCriteria==="sort_by_due_date_increasing"
-              || this.state.sortingCriteria==="sort_by_due_date_decreasing") {
-      if (item1.due_date < item2.due_date)
-        return -1;
-      else if (item1.due_date > item2.due_date)
-        return 1;
-      else
-        return 0;
-    }
-    // SORT BY COMPLETED
-    else {
-      if (item1.completed < item2.completed)
-        return -1;
-      else if (item1.completed > item2.completed)
-        return 1;
-      else
-        return 0;
-    }
-  }
-
+    
   handleKeyPress = (e) => {
     if (this.state.currentScreen === AppScreen.LIST_SCREEN) {
       let button = String.fromCharCode(e.which).toLowerCase();
@@ -284,8 +250,7 @@ class App extends Component {
           addMoveDownTransaction={this.addMoveDownTransaction}
           addNameChangeTransaction={this.addNameChangeTransaction}
           addOwnerChangeTransaction={this.addOwnerChangeTransaction}
-          addListItemRemovalTransaction={this.addListItemRemovalTransaction}
-          tps={this.tps}/>;
+          addListItemRemovalTransaction={this.addListItemRemovalTransaction}/>;
       case AppScreen.ITEM_SCREEN:
         return <ItemScreen 
         //currentScreen={AppScreen.ITEM_SCREEN}
